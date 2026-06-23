@@ -66,11 +66,11 @@ export const login = async (req, res, next) => {
             })
         }
 
-        // Check for user (include password for comprassion)
+        // Check for user (include password for comparison)
         const user = await User.findOne({ email }).select('+password')
 
         if(!user) {
-            return res.send(401).json({
+            return res.status(401).json({
                 success: false,
                 error: "Invalid credentials",
                 statusCode: 401,
@@ -81,7 +81,7 @@ export const login = async (req, res, next) => {
         const isMatch = await user.matchPassword(password)
 
         if(!isMatch) {
-            return res.satus(401).json({
+            return res.status(401).json({
                 success: false,
                 error: "Invalid credentials",
                 statusCode: 401,

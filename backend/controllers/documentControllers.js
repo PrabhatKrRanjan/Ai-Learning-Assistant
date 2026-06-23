@@ -150,7 +150,7 @@ export const getDocuments = async (req, res, next) => {
         res.status(200).json({
             success: true,
             count: documents.length,
-            dara: documents
+            data: documents
         })
 
     } catch (error) {
@@ -163,7 +163,33 @@ export const getDocuments = async (req, res, next) => {
 // @access  Private
 export const getDocument = async (req, res, next) => {
     try {
+        const document = await Document.findOne({ _id: req.params.id, userId: req.user._id })
+        
+        if(!document) {
+            return res.status(404).json({
+                success: false,
+                error: 'Document not found',
+                statusCode: 404
+            })
+        }
 
+        // Get count of associated flashcards and quizzes
+        const flashcardCount = await Flashcard.countDocuments({ documentId: document._id, userId: req.user._id })
+        const quizCount = await Quiz.countDocuments({ documentId: document._id, userId: req.user._id })
+
+        // Update last accessed
+        document.lastAccessed = Date.now();
+        await document.save();
+
+        // Continue document data with counts
+        const documentData = document.toObject();
+        documentData.flashcardCount = flashcardCount;
+        documentData.quizCount = quizCount;
+
+        res.status(200).json({
+            success: true,
+            data: documentData,
+        });
     } catch (error) {
         next(error)
     }
@@ -174,20 +200,29 @@ export const getDocument = async (req, res, next) => {
 // @access  Private
 export const deleteDocument = async (req, res, next) => {
     try {
+        const document = Document.findOne({ _id: req.params.id, userId: req.user._id });
+
+        if (!document) {
+            return res.status(400).json({
+                success: false,
+                error: "Document not found",
+                statusCode: 400
+            })
+        }
+
+        // Delete file from filesystem
+        await fs.unlink(document.filePath).catch(()=>{});
+
+        // Delete document
+        await document.deleteOne();
+
+        res.status(200).json({
+            success: true,
+            message: "Document deleted successfully",
+        })
 
     } catch (error) {
         // Clean up file on error
-        next(error)
-    }
-}
-
-// @desc    Update document title
-// @route   PUT /documents/:id
-// @access  Private
-export const updateDocument = async (req, res, next) => {
-    try {
-
-    } catch (error) {
         next(error)
     }
 }
