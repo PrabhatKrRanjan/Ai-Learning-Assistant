@@ -12,15 +12,15 @@ import FlashcardPage from './pages/Flashcards/FlashcardPage';
 import QuizTakePage from './pages/Quizzes/QuizTakePage';
 import QuizResultPage from './pages/Quizzes/QuizResultPage';
 import ProfilePage from './pages/Profile/ProfilePage';
+import { useAuth } from './context/AuthContext';
 
 const App = () => {
-  const isAuthenticated = false; // Replace with actual authentication logic
-  const loading = false; // Replace with actual loading state
+    const { isAuthenticated, loading } = useAuth();
 
   if (loading) {
     return (
-      <div class="flex items-center justify-center h-screen">
-        <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-emerald-600">Loading...</div>
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-emerald-600">Loading...</div>
       </div>
     );
   }
